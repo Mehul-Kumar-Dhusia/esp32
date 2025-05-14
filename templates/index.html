@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ESP32 Voice + Button Control</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
+    
+      body {
+        background-color: #f5f7fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        min-height: 100vh;
+      }
+    
+      h1 {
+        color: #333;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+    
+      .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 400px;
+      }
+    
+      button {
+        padding: 1rem;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 10px;
+        background-color: #007bff;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 10px;
+      }
+    
+      button:hover {
+        background-color: #0056b3;
+        transform: translateY(-2px);
+      }
+    
+      #status {
+        margin-top: 2rem;
+        font-size: 1.1rem;
+        color: #222;
+        text-align: center;
+      }
+    
+      /* @media (max-width: 600px) {
+        button {
+          font-size: 1rem;
+          padding: 0.8rem;
+        }
+    
+        h1 {
+          font-size: 1.5rem;
+        }
+      } */
+    
+      .mic-button {
+        background-color: #28a745;
+      }
+    
+      .mic-button:hover {
+        background-color: #1e7e34;
+      }
+
+    </style>
+    
+  </head>
+  <body>
+    <h1>LED Control</h1>
+    <button onclick="sendCommand('turn on led')">Turn ON LED</button>
+    <button onclick="sendCommand('turn off led')">Turn OFF LED</button>
+    <br /><br />
+    <button onclick="startListening()">🎤 Speak Command</button>
+    <!-- <p id="status"></p> -->
+
+    <script>
+      function sendCommand(text , speak = false) {
+        fetch("/command", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("status").innerText = data.message;
+            if (speak) {
+              const audio = new Audio("/" + data.voice);
+              audio.play();
+            }
+          });
+      }
+
+      function startListening() {
+        const recognition = new (window.SpeechRecognition ||
+          window.webkitSpeechRecognition)();
+        recognition.lang = "en-IN";
+        recognition.start();
+        recognition.onresult = function (event) {
+          const text = event.results[0][0].transcript;
+          sendCommand(text , true);
+        };
+      }
+    </script>
+  </body>
+</html>

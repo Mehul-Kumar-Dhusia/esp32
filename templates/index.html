@@ -116,7 +116,7 @@
         recognition.start();
         recognition.onresult = function (event) {
           const text = event.results[0][0].transcript;
-          sendCommand(text , true);
+          sendCommand(text , false);
         };
       }
     </script>
